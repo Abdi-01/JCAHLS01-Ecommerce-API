@@ -10,8 +10,8 @@ app.use(express.json());
 // DB Check Connection
 const { dbConf } = require('./config/database')
 
-dbConf.getConnection((error, connection)=>{
-    if(error){
+dbConf.getConnection((error, connection) => {
+    if (error) {
         console.log("Error MySQL Connection", error.message, error.sqlMessage);
     }
 
@@ -25,5 +25,11 @@ app.get('/', (req, res) => {
 const { userRouter, bannerRouter } = require('./routers');
 app.use('/users', userRouter);
 app.use('/banner', bannerRouter);
+
+// Handling error 
+app.use((error, req, res, next) => {
+    console.log(error);
+    res.status(500).send(error)
+})
 
 app.listen(PORT, () => console.log(`Running API at PORT ${PORT}`));

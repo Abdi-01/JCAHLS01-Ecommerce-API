@@ -1,13 +1,12 @@
 const { dbConf } = require("../config/database");
 
 module.exports = {
-    getData: (req, res) => {
-        dbConf.query('Select * FROM banner;', (error, results) => {
+    getData: (req, res, next) => {
+        dbConf.query('Select * FROM data;', (error, results) => {
             if (error) {
-                res.status(500).send(error);
+                return next(error)
             }
-
-            res.status(200).send(results)
+            return res.status(200).send(results)
         })
     }
 }
