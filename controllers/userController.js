@@ -7,10 +7,21 @@ module.exports = {
                 console.log(error);
                 res.status(500).send(error);
             }
+            
+            // res.status(200).send(resultsUser);
+            dbConf.query('Select * FROM cart;',(errorCart,resultsCart)=>{
+                if(errorCart){
+                    console.log(errorCart);
+                    res.status(500).send(errorCart);
+                }
+                
+                console.log(resultsUser);
+                console.log(resultsCart);
 
-            console.log(resultsUser);
-            res.status(200).send(resultsUser);
+            })
         })
+        
+
     },
     register: (req, res) => {
         res.status(200).send("<h2>REGISTER</h2>")
