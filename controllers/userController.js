@@ -15,9 +15,6 @@ module.exports = {
                     res.status(500).send(errorCart);
                 }
 
-                console.log(resultsUser);
-                console.log(resultsCart);
-
                 resultsUser.forEach((val, idx) => {
                     val.cart = [];
                     resultsCart.forEach((valCart, idxCart) => {
