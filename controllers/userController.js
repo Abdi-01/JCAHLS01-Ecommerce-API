@@ -1,40 +1,88 @@
-const { dbConf } = require("../config/database")
+const { dbConf, dbQuery } = require("../config/database")
 
 module.exports = {
-    getData: (req, res, next) => {
-        dbConf.query('Select iduser, username, email, role FROM users;', (error, resultsUser) => {
-            if (error) {
-                return next(error);
-            }
+    getData: async (req, res, next) => {
+        try {
 
-            // res.status(200).send(resultsUser);
-            dbConf.query('Select * FROM cart;', (errorCart, resultsCart) => {
-                if (errorCart) {
-                    return next(errorCart);
-                }
+            let resultsUsers = await dbQuery('Select iduser,username,email,role FROM users');
 
-                resultsUser.forEach((val, idx) => {
-                    val.cart = [];
-                    resultsCart.forEach((valCart, idxCart) => {
-                        if (val.iduser == valCart.iduser) {
-                            val.cart.push(valCart)
-                        }
-                    })
+            let resultsCart = await dbQuery(`Select p.nama, i.urlImg , p.harga, s.type, 
+            s.qty as stockQty, c.* FROM cart c 
+            JOIN stocks s ON c.idstock = s.idstock
+            JOIN products p ON p.idproduct = s.idproduct
+            JOIN images i ON i.idproduct = p.idproduct GROUP BY c.idcart;`);
+
+            resultsUsers.forEach((val, idx) => {
+                val.cart = [];
+                resultsCart.forEach((valCart, idxCart) => {
+                    if (val.iduser == valCart.iduser) {
+                        val.cart.push(valCart)
+                    }
                 })
-
-                return res.status(200).send(resultsUser);
-
             })
-        })
 
-
+            return res.status(200).send(resultsUsers);
+        } catch (error) {
+            return next(error)
+        }
     },
     register: (req, res, next) => {
         res.status(200).send("<h2>REGISTER</h2>")
 
     },
-    login: (req, res, next) => {
-        res.status(200).send("<h2>LOGIN</h2>")
+    login: async (req, res, next) => {
+        try {
+            //    console.log(req.body)
+            let resultsLogin = await dbQuery(`Select iduser,username,email,role FROM users 
+            WHERE email='${req.body.email}' AND password='${req.body.password}' ;`);
+
+            if (resultsLogin.length == 1){
+                let resultsCart = await dbQuery(`Select p.nama, i.urlImg , p.harga, s.type, 
+                s.qty as stockQty, c.* FROM cart c 
+                JOIN stocks s ON c.idstock = s.idstock
+                JOIN products p ON p.idproduct = s.idproduct
+                JOIN images i ON i.idproduct = p.idproduct WHERE c.iduser=${resultsLogin[0].iduser}
+                GROUP BY c.idcart;`);
+
+                resultsLogin[0].cart = resultsCart;
+                return res.status(200).send(resultsLogin[0]);
+            }else{
+                return res.status(404).send({
+                    success:false,
+                    message:"User not found ⚠️"
+                });
+            }
+
+        } catch (error) {
+            return next(error);
+        }
+    },
+    keepLogin: async (req, res, next) => {
+        try {
+            //    console.log(req.body)
+            let resultsLogin = await dbQuery(`Select iduser,username,email,role FROM users 
+            WHERE iduser=${req.body.iduser} ;`);
+
+            if (resultsLogin.length == 1){
+                let resultsCart = await dbQuery(`Select p.nama, i.urlImg , p.harga, s.type, 
+                s.qty as stockQty, c.* FROM cart c 
+                JOIN stocks s ON c.idstock = s.idstock
+                JOIN products p ON p.idproduct = s.idproduct
+                JOIN images i ON i.idproduct = p.idproduct WHERE c.iduser=${resultsLogin[0].iduser}
+                GROUP BY c.idcart;`);
+
+                resultsLogin[0].cart = resultsCart;
+                return res.status(200).send(resultsLogin[0]);
+            }else{
+                return res.status(404).send({
+                    success:false,
+                    message:"User not found ⚠️"
+                });
+            }
+
+        } catch (error) {
+            return next(error);
+        }
     },
     edit: (req, res, next) => {
 

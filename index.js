@@ -1,12 +1,13 @@
 const express = require('express');
 const app = express();
+const cors = require('cors');
 const dotenv = require('dotenv'); // menyimpan value kedalam environtment variable
 dotenv.config();
 
 const PORT = process.env.PORT;
 
 app.use(express.json());
-
+app.use(cors());
 // DB Check Connection
 const { dbConf } = require('./config/database')
 
