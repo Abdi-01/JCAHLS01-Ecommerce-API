@@ -9,6 +9,7 @@ dotenv.config();
 const PORT = process.env.PORT;
 
 app.use(express.json());
+app.use(express.static('public'));
 app.use(cors());
 // DB Check Connection
 const { dbConf } = require('./config/database')
