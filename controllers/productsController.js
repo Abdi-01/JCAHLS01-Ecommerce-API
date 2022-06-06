@@ -1,6 +1,6 @@
 const { dbConf, dbQuery } = require('../config/database');
 const { uploader } = require('../config/uploader');
-
+const fs = require('fs');
 module.exports = {
     getData: async (req, res, next) => {
         try {
@@ -64,6 +64,7 @@ module.exports = {
                 }
 
             } catch (error) {
+                req.files.forEach(val => fs.unlinkSync(`./public/imgProduct/${val.filename}`));
                 return next(error)
             }
         })
