@@ -1,4 +1,5 @@
 const { dbConf, dbQuery } = require('../config/database');
+const { uploader } = require('../config/uploader');
 
 module.exports = {
     getData: async (req, res, next) => {
@@ -30,35 +31,41 @@ module.exports = {
             return next(error)
         }
     },
-    addData: async (req, res, next) => {
-        try {
+    addData: (req, res, next) => {
+        const uploadFile = uploader('/imgProduct', 'IMGPRO').array('images', 5);
+        uploadFile(req, res, async (error) => {
+            try {
 
-            let { nama, brand, kategori, deskripsi, harga, images, stocks } = req.body;
+                console.log(req.body);
+                console.log('Pengecekan file :', req.files);
 
-            let insertProduct = await dbQuery(`INSERT INTO products (nama, brand, kategori, deskripsi, harga)
-            values (${dbConf.escape(nama)}, ${dbConf.escape(brand)}, ${dbConf.escape(kategori)}, 
-            ${dbConf.escape(deskripsi)}, ${dbConf.escape(harga)});`);
+                let { nama, brand, kategori, deskripsi, harga, stocks } = JSON.parse(req.body.data);
 
-            if (insertProduct.insertId) {
-                // add images
-                let imgData = images.map(val => {
-                    return `(${dbConf.escape(insertProduct.insertId)},${dbConf.escape(val)})`;
-                })
+                let insertProduct = await dbQuery(`INSERT INTO products (nama, brand, kategori, deskripsi, harga)
+                    values (${dbConf.escape(nama)}, ${dbConf.escape(brand)}, ${dbConf.escape(kategori)}, 
+                    ${dbConf.escape(deskripsi)}, ${dbConf.escape(harga)});`);
 
-                await dbQuery(`INSERT INTO images (idproduct,urlImg) values ${imgData.join(',')};`)
-                // add stocks
-                let stocksData = stocks.map(val => {
-                    return `(${dbConf.escape(insertProduct.insertId)},${dbConf.escape(val.type)},${dbConf.escape(val.qty)})`;
-                })
-                await dbQuery(`INSERT INTO stocks (idproduct,type,qty) values ${stocksData.join(',')};`)
-                return res.status(200).send({
-                    success:true,
-                    message :"Add product success ✅"
-                })
+                if (insertProduct.insertId) {
+                    // add images
+                    let imgData = req.files.map(val => {
+                        return `(${dbConf.escape(insertProduct.insertId)},${dbConf.escape(`/imgProduct/${val.filename}`)})`;
+                    })
+
+                    await dbQuery(`INSERT INTO images (idproduct,urlImg) values ${imgData.join(',')};`)
+                    // add stocks
+                    let stocksData = stocks.map(val => {
+                        return `(${dbConf.escape(insertProduct.insertId)},${dbConf.escape(val.type)},${dbConf.escape(val.qty)})`;
+                    })
+                    await dbQuery(`INSERT INTO stocks (idproduct,type,qty) values ${stocksData.join(',')};`)
+                    return res.status(200).send({
+                        success: true,
+                        message: "Add product success ✅"
+                    })
+                }
+
+            } catch (error) {
+                return next(error)
             }
-
-        } catch (error) {
-            return next(error)
-        }
+        })
     },
 }
