@@ -1,6 +1,7 @@
 const { dbConf, dbQuery } = require('../config/database');
 const { uploader } = require('../config/uploader');
 const fs = require('fs');
+
 module.exports = {
     getData: async (req, res, next) => {
         try {

@@ -4,9 +4,12 @@ const cors = require('cors');
 const dotenv = require('dotenv'); // menyimpan value kedalam environtment variable
 const mongoose = require('mongoose');
 const { mongoAccessURL } = require('./config/mongo');
+const bearerToken = require('express-bearer-token');
 dotenv.config();
 
 const PORT = process.env.PORT;
+
+app.use(bearerToken()); // untuk mengambil data token dari req.header
 
 app.use(express.json());
 app.use(express.static('public'));
