@@ -5,9 +5,9 @@ module.exports = {
     hashPassword: (pass) => {
         return Crypto.createHmac("sha256", "JCAHLS-01").update(pass).digest("hex");
     },
-    createToken: (payload) => {
+    createToken: (payload, time = "24h") => {
         let token = jwt.sign(payload, "JCAHLS-01", {
-            expiresIn: "12h"
+            expiresIn: time
         })
 
         return token;

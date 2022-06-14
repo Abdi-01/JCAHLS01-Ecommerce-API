@@ -42,13 +42,13 @@ module.exports = {
                     // Generate token
                     let { iduser, username, email, role, status } = resultsLogin[0];
 
-                    let token = createToken({ iduser, username, email, role, status });
+                    let token = createToken({ iduser, username, email, role, status }, "1h");
 
                     // Mengirimkan email
                     await transporter.sendMail({
                         from: "Admin Commerce",
                         to: email,
-                        subject: "Verification Email Acoount",
+                        subject: "Verification Email Acount",
                         html: `<div> 
                         <h3>Click Link Below :</h3>
                         <a href="${process.env.FE_URL}/verification/${token}">Verified Account Here</a>
@@ -141,6 +141,35 @@ module.exports = {
                 let { iduser, username, email, role, status } = resultsLogin[0]
                 let token = createToken({ iduser, username, email, role, status });
                 return res.status(200).send({ ...resultsLogin[0], token, success: true });
+            }
+        } catch (error) {
+            return next(error)
+        }
+    },
+    reVerified: async (req, res, next) => {
+        try {
+            if (req.dataUser) {
+                let resultsLogin = await dbQuery(`Select iduser,username,email,role, status FROM users 
+                WHERE iduser=${req.dataUser.iduser};`);
+
+                let { iduser, username, email, role, status } = resultsLogin[0];
+                let token = createToken({ iduser, username, email, role, status }, "1h");
+
+                // Mengirimkan email
+                await transporter.sendMail({
+                    from: "Admin Commerce",
+                    to: email,
+                    subject: "Re-Verification Email Acount",
+                    html: `<div> 
+                    <h3>Click Link Below :</h3>
+                    <a href="${process.env.FE_URL}/verification/${token}">Verified Account Here</a>
+                    </div>`
+                })
+
+                return res.status(200).send({
+                    success:true,
+                    message:"Reverification email link delivered ✅"
+                })
             }
         } catch (error) {
             return next(error)
