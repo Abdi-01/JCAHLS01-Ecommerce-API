@@ -5,6 +5,7 @@ const { userController } = require('../controllers');
 router.get('/get', userController.getData);
 router.post('/regis', userController.register);
 router.post('/login', userController.login);
+router.patch('/verified', readToken, userController.verifiedAccount);
 router.get('/keep', readToken, userController.keepLogin);
 
 module.exports = router;

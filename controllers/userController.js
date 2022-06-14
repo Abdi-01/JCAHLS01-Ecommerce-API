@@ -1,5 +1,6 @@
-const { dbConf, dbQuery } = require("../config/database")
-const { hashPassword, createToken } = require('../config/encription')
+const { dbConf, dbQuery } = require("../config/database");
+const { hashPassword, createToken } = require('../config/encription');
+const { transporter } = require('../config/nodemailer');
 module.exports = {
     getData: async (req, res, next) => {
         try {
@@ -35,17 +36,26 @@ module.exports = {
 
             // console.log(insertData);
             if (insertData.insertId) {
-                let resultsLogin = await dbQuery(`Select iduser,username,email,role FROM users 
+                let resultsLogin = await dbQuery(`Select iduser,username,email,role, status FROM users 
                 WHERE iduser=${insertData.insertId};`);
                 if (resultsLogin.length == 1) {
-                    let resultsCart = await dbQuery(`Select p.nama, i.urlImg , p.harga, s.type, 
-                    s.qty as stockQty, c.* FROM cart c 
-                    JOIN stocks s ON c.idstock = s.idstock
-                    JOIN products p ON p.idproduct = s.idproduct
-                    JOIN images i ON i.idproduct = p.idproduct WHERE c.iduser=${insertData.insertId}
-                    GROUP BY c.idcart;`);
-                    resultsLogin[0].cart = resultsCart
-                    return res.status(200).send(resultsLogin[0])
+                    // Generate token
+                    let { iduser, username, email, role, status } = resultsLogin[0];
+
+                    let token = createToken({ iduser, username, email, role, status });
+
+                    // Mengirimkan email
+                    await transporter.sendMail({
+                        from: "Admin Commerce",
+                        to: email,
+                        subject: "Verification Email Acoount",
+                        html: `<div> 
+                        <h3>Click Link Below :</h3>
+                        <a href="${process.env.FE_URL}/verification/${token}">Verified Account Here</a>
+                        </div>`
+                    })
+
+                    return res.status(200).send({ ...resultsLogin[0], token })
                 } else {
                     return res.status(404).send({
                         success: false,
@@ -62,10 +72,10 @@ module.exports = {
     login: async (req, res, next) => {
         try {
             //    console.log(req.body)
-            let resultsLogin = await dbQuery(`Select iduser,username,email,role FROM users 
+            let resultsLogin = await dbQuery(`Select iduser,username,email,role, status FROM users 
             WHERE email='${req.body.email}' AND password='${hashPassword(req.body.password)}' ;`);
-
-            if (resultsLogin.length == 1) {
+            console.log(resultsLogin)
+            if (resultsLogin[0].iduser) {
                 let resultsCart = await dbQuery(`Select p.nama, i.urlImg , p.harga, s.type, 
                 s.qty as stockQty, c.* FROM cart c 
                 JOIN stocks s ON c.idstock = s.idstock
@@ -74,10 +84,10 @@ module.exports = {
                 GROUP BY c.idcart;`);
 
                 resultsLogin[0].cart = resultsCart;
-                
+
                 // Me-generate token
-                let { iduser, username, email, role } = resultsLogin[0]
-                let token = createToken({ iduser, username, email, role });
+                let { iduser, username, email, role, status } = resultsLogin[0]
+                let token = createToken({ iduser, username, email, role, status });
                 return res.status(200).send({ ...resultsLogin[0], token });
             } else {
                 return res.status(404).send({
@@ -85,19 +95,18 @@ module.exports = {
                     message: "User not found ⚠️"
                 });
             }
-            
+
         } catch (error) {
             return next(error);
         }
     },
     keepLogin: async (req, res, next) => {
         try {
-            console.log("Data read token", req.dataUser)
-            if (req.dataUser.iduser) {
-                let resultsLogin = await dbQuery(`Select iduser,username,email,role FROM users 
+            if (req.dataUser) {
+                let resultsLogin = await dbQuery(`Select iduser,username,email,role, status FROM users 
                 WHERE iduser=${req.dataUser.iduser} ;`);
-                
-                if (resultsLogin.length == 1) {
+
+                if (resultsLogin[0].iduser) {
                     let resultsCart = await dbQuery(`Select p.nama, i.urlImg , p.harga, s.type, 
                     s.qty as stockQty, c.* FROM cart c 
                     JOIN stocks s ON c.idstock = s.idstock
@@ -105,10 +114,10 @@ module.exports = {
                     JOIN images i ON i.idproduct = p.idproduct WHERE c.iduser=${resultsLogin[0].iduser}
                     GROUP BY c.idcart;`);
                     resultsLogin[0].cart = resultsCart;
-                    
+
                     // Me-generate token
-                    let { iduser, username, email, role } = resultsLogin[0]
-                    let token = createToken({ iduser, username, email, role });
+                    let { iduser, username, email, role, status } = resultsLogin[0]
+                    let token = createToken({ iduser, username, email, role, status });
                     return res.status(200).send({ ...resultsLogin[0], token });
                 } else {
                     return res.status(404).send({
@@ -116,19 +125,26 @@ module.exports = {
                         message: "User not found ⚠️"
                     });
                 }
-            }else{
-                return res.status(401).send({
-                    success: false,
-                    message: "Token expired"
-                });
             }
-
         } catch (error) {
             return next(error);
         }
     },
-    edit: (req, res, next) => {
+    verifiedAccount: async (req, res, next) => {
+        try {
+            if (req.dataUser) {
+                let update = await dbQuery(`UPDATE users SET status='Verified' WHERE iduser=${req.dataUser.iduser};`)
+                console.log(update)
+                let resultsLogin = await dbQuery(`Select iduser,username,email,role, status FROM users 
+                WHERE iduser=${req.dataUser.iduser} ;`);
 
+                let { iduser, username, email, role, status } = resultsLogin[0]
+                let token = createToken({ iduser, username, email, role, status });
+                return res.status(200).send({ ...resultsLogin[0], token, success: true });
+            }
+        } catch (error) {
+            return next(error)
+        }
     },
     deActiveAccount: (req, res, next) => {
 
