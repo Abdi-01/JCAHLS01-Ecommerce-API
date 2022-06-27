@@ -1,0 +1,13 @@
+Data yang didapat dari akun google
+{
+    id: 'xxxxx',
+  displayName: 'fullname',
+  name: { familyName: 'lastname', givenName: 'firstname' },
+  emails: [ { value: 'xxxxxx@gmail.com', verified: true } ],
+  photos: [
+    {
+      value: 'https://lh3.googleusercontent.com/a/AATXAJyzukzpqERS2-yrwNeb4qBxorvaRDzKo5hboksf=s96-c'
+    }
+  ]
+
+  }
