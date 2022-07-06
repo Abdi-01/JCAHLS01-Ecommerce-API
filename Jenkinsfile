@@ -18,14 +18,13 @@ pipeline {
                 sh 'git pull origin main'
             }
         }
-        // stage('Restart'){
-        //     steps{
-        //         sh 'pm2 restart 0'
-        //     }
-        // }
-        stage('Check'){
+        stage('Restart'){
             steps{
-                sh 'pm2 list'
+                sh '#!/bin/sh
+                    ssh root@139.162.45.176<<EOF
+                    pm2 restart all
+                    exit
+                    EOF'
             }
         }
     }
