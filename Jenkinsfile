@@ -20,11 +20,12 @@ pipeline {
         }
         stage('Restart'){
             steps{
-                sh '#!/bin/sh
-                    ssh root@139.162.45.176<<EOF
-                    pm2 restart all
-                    exit
-                    EOF'
+                sh 'sudo su - root -c "pm2 restart all"'
+            }
+        }
+        stage('Check'){
+            steps{
+                sh 'pm2 list'
             }
         }
     }
