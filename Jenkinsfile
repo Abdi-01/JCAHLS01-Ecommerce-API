@@ -6,7 +6,7 @@ pipeline {
     }
 
     stages{
-        stage('Target Dir'){
+        stage('Target'){
             steps{
                 sh 'cd ../../../../../'
                 sh 'cd root/api_app/JCAHLS01-Ecommerce-API/'
