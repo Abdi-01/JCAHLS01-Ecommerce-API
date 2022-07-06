@@ -20,7 +20,7 @@ pipeline {
         }
         stage('Restart'){
             steps{
-                sh 'pm2 restart commerce-api'
+                sh 'pm2 restart 0'
             }
         }
         stage('Check'){
