@@ -4,7 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "pm2 start index.js --name 'commerce-api-jenkins'",
+    "stop": "pm2 stop commerce-api-jenkins",
+    "restart": "pm2 stop commerce-api-jenkins"
   },
   "author": "",
   "license": "ISC",
@@ -20,6 +23,7 @@
     "mysql": "^2.18.1",
     "nodemailer": "^6.7.5",
     "passport": "^0.6.0",
-    "passport-google-oauth": "^2.0.0"
+    "passport-google-oauth": "^2.0.0",
+    "pm2": "^5.2.0"
   }
 }

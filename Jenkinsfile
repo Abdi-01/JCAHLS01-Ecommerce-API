@@ -14,18 +14,14 @@ pipeline {
         }
         stage('Pull'){
             steps{
+                sh 'npm install'
                 sh 'git add .'
                 sh 'git pull origin main'
             }
         }
-        stage('Restart'){
+        stage('Start'){
             steps{
-                sh 'sudo su - root -c "pm2 restart all"'
-            }
-        }
-        stage('Check'){
-            steps{
-                sh 'pm2 list'
+                sh 'npm run start"'
             }
         }
     }
