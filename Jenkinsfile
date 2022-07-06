@@ -15,7 +15,7 @@ pipeline {
         stage('Pull'){
             steps{
                 sh 'git add .'
-                sh "git commit -m 'server commit'"
+                sh 'git commit -m "server commit"'
                 sh 'git pull origin main'
             }
         }
