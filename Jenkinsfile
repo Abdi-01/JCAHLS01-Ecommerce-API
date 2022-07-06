@@ -8,7 +8,7 @@ pipeline {
     stages{
         stage('Target'){
             steps{
-                sh 'cd api_app/JCAHLS01-Ecommerce-API'
+                sh 'cd api_app/JCAHLS01-Ecommerce-API/'
             }
         }
         stage('Pull'){
