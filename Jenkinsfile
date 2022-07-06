@@ -8,6 +8,7 @@ pipeline {
     stages{
         stage('Target'){
             steps{
+                sh 'pwd'
                 sh 'cd root/api_app/JCAHLS01-Ecommerce-API/'
             }
         }
