@@ -18,11 +18,11 @@ pipeline {
                 sh 'git pull origin main'
             }
         }
-        stage('Restart'){
-            steps{
-                sh 'pm2 restart 0'
-            }
-        }
+        // stage('Restart'){
+        //     steps{
+        //         sh 'pm2 restart 0'
+        //     }
+        // }
         stage('Check'){
             steps{
                 sh 'pm2 list'
